@@ -2,7 +2,6 @@ $("#request_topic").val(getRequestTopicName());
 
 var batch_ingestion = {
     "not_file":true,
-    "batch_limit": 100001,
     "data": []
 };
 
@@ -32,15 +31,8 @@ $("#batch_submit").click(function(){
         }
     }
     else{
-        batch_data = batch_ingestion.data;
-        for(var i = 0; i < batch_data.length; i++){
-
-            
-                var reqTopic = $("#request_topic").val();
-                postToTopic(reqTopic, batch_data[i])
-       
-        }
-
+        var reqTopic = $("#request_topic").val();
+        postToTopic(reqTopic,  batch_ingestion.data);
     }
 
 
@@ -59,28 +51,13 @@ document.getElementById('inputfile').addEventListener('change', function() {
     $('#batch_message').prop("disabled", true);
     var fr=new FileReader();
    
-    fr.onload=function(){
+    fr.onload=function(){ 
         var counter = 1;
         var batchObjList = [];
         var lines = this.result.split('\n');
         for(var line = 0; line < lines.length; line++,counter++){
-            batchObjList.push({"value" : lines[line].trim(), "key":"partition-0"});
-            if(counter>=batch_ingestion.batch_limit){
-                batch_ingestion.data.push(batchObjList)
-                batchObjList = [];
-                counter=-1
-                continue;
-            }
+            batch_ingestion.data.push({"value" : lines[line].trim(), "key":"partition-0"})
         }
-
-        if(batchObjList.length>0){
-            batch_ingestion.data.push(batchObjList)
-        }
-
-        console.log( batch_ingestion.data);
-
-        console.log("filed loaded!");
-        fr=null;
     };
     
     fr.readAsText(this.files[0]);
